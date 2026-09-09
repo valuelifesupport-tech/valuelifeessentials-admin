@@ -40,7 +40,8 @@ export default function App() {
 
   const handleExitAdmin = () => {
     if (window.confirm('Open live storefront in a new tab?')) {
-      window.open('https://valuelifeessentials.com/', '_blank');
+      const storeUrl = import.meta.env.VITE_STOREFRONT_URL || 'https://valuelifeessentials.com';
+      window.open(storeUrl, '_blank');
     }
   };
 
