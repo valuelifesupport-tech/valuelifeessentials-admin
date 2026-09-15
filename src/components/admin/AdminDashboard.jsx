@@ -1286,31 +1286,57 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
   };
 
   const handleUpdateProductStock = async (productId, newStock) => {
+    const val = Math.max(0, Number(newStock) || 0);
+    // Optimistic UI update: immediately update product stock in state
+    setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: val } : p));
     try {
       const res = await adminFetch(`/api/products/${productId}/stock`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock: Number(newStock) })
+        body: JSON.stringify({ stock: val })
       });
       if (res.ok) {
+        if (showToast) showToast('success', 'Stock Updated Live', `Product stock updated to ${val} units.`);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        if (showToast) showToast('error', 'Update Failed', err.error || `Server error (${res.status})`);
         fetchAdminData();
-        if (showToast) showToast('success', 'Stock Updated Live', `Product stock updated to ${newStock} units.`);
       }
-    } catch (err) {}
+    } catch (err) {
+      if (showToast) showToast('error', 'Update Failed', err.message);
+      fetchAdminData();
+    }
   };
 
   const handleUpdateVariantStock = async (variantId, newStock) => {
+    const val = Math.max(0, Number(newStock) || 0);
+    // Optimistic UI update: immediately update variant stock in state
+    setProducts(prev => prev.map(p => {
+      if (p.variants && p.variants.some(v => v.id === variantId)) {
+        return {
+          ...p,
+          variants: p.variants.map(v => v.id === variantId ? { ...v, stock: val } : v)
+        };
+      }
+      return p;
+    }));
     try {
       const res = await adminFetch(`/api/variants/${variantId}/stock`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock: Number(newStock) })
+        body: JSON.stringify({ stock: val })
       });
       if (res.ok) {
+        if (showToast) showToast('success', 'Variant Stock Updated', `Variant stock updated to ${val} units.`);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        if (showToast) showToast('error', 'Update Failed', err.error || `Server error (${res.status})`);
         fetchAdminData();
-        if (showToast) showToast('success', 'Variant Stock Updated', `Variant stock updated to ${newStock} units.`);
       }
-    } catch (err) {}
+    } catch (err) {
+      if (showToast) showToast('error', 'Update Failed', err.message);
+      fetchAdminData();
+    }
   };
 
   const handleDeleteVariant = async (id) => {
