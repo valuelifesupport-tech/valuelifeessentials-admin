@@ -59,27 +59,7 @@ import UserDossierModal from './modals/UserDossierModal';
 import ConfirmModals from './modals/ConfirmModals';
 
 
-const resolveImgUrl = (url, fallback = 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=100&q=80') => {
-  if (!url || typeof url !== 'string' || !url.trim()) return fallback;
-  let clean = url.trim();
-
-  if (clean.startsWith('data:')) return clean;
-
-  if (clean.includes('/uploads/')) {
-    const filename = clean.split('/uploads/').pop();
-    return getApiUrl(`/api/media/file/${filename}`);
-  }
-
-  if (clean.includes('/images/')) {
-    const relative = clean.split('/images/').pop();
-    return `/images/${relative}`;
-  }
-
-  if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
-
-  const path = clean.startsWith('/') ? clean : `/${clean}`;
-  return getApiUrl(path);
-};
+import { resolveImgUrl, getProxyImgUrl, DEFAULT_FALLBACK_SVG } from '../../utils/resolveImgUrl';
 
 export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig: propSectionsConfig, onUpdateSectionsConfig, settings: propSettings, onUpdateSettings }) {
   const [adminToken, setAdminToken] = useState(() => localStorage.getItem('admin_session_token') || '');
@@ -268,7 +248,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
   const [variantForm, setVariantForm] = useState({ variant_name: '', price_inr: 149, price_usd: 4, discount_inr: 99, discount_usd: 3, stock: 50 });
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '', image_url: '' });
   const [subcategoryName, setSubcategoryName] = useState('');
-  const [bannerForm, setBannerForm] = useState({ title: '100% Certified Organic & Wellness Products', subtitle: 'Boost your health naturally with ValueLife Essentials', image_url: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1200&q=80', link_url: '/products' });
+  const [bannerForm, setBannerForm] = useState({ title: '100% Certified Organic & Wellness Products', subtitle: 'Boost your health naturally with ValueLife Essentials', image_url: DEFAULT_FALLBACK_SVG, link_url: '/products' });
   const [couponForm, setCouponForm] = useState({ 
     code: 'VALUELIFE15', 
     discount_type: 'PERCENT', 
@@ -727,7 +707,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
   const [loadedTabs, setLoadedTabs] = useState(new Set());
 
   const fetchTabData = async (tab) => {
-    if (loadedTabs.has(tab)) return;
+    if (loadedTabs.has(tab) && tab !== 'reviews') return;
 
     try {
       if (tab === 'media') {
@@ -770,13 +750,14 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
   }, [activeTab]);
 
   const fetchAdminData = async () => {
-    // Fast Essential Data load ONLY
-    const [prods, cats, colls, ords, sets] = await Promise.all([
+    // Fast Essential Data load
+    const [prods, cats, colls, ords, sets, revs] = await Promise.all([
       safeFetchJson('/api/products?includeDrafts=true'),
       safeFetchJson('/api/categories'),
       safeFetchJson('/api/collections'),
       safeFetchJson('/api/admin/orders'),
-      safeFetchJson('/api/settings')
+      safeFetchJson('/api/settings'),
+      safeFetchJson('/api/admin/reviews')
     ]);
 
     if (prods) {
@@ -795,6 +776,9 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
     if (sets) {
       setSettings(sets);
       setSettingsForm(sets);
+    }
+    if (revs && Array.isArray(revs)) {
+      setReviews(revs);
     }
   };
 
@@ -2264,6 +2248,9 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
         fetchAdminData={fetchAdminData}
         adminFetch={adminFetch}
         showToast={showToast}
+        setShowBrowseModal={setShowBrowseModal}
+        setBrowseTargetType={setBrowseTargetType}
+        setBrowseTargetField={setBrowseTargetField}
       />
 
       <CollectionModal

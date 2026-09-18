@@ -1,5 +1,5 @@
 node_modules/
-dist/
+# dist/ (tracked for static LiteSpeed hosting)
 .DS_Store
 *.local
 .env

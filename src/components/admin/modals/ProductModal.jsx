@@ -1,3 +1,4 @@
+import { DEFAULT_FALLBACK_SVG, getProxyImgUrl } from '../../../utils/resolveImgUrl';
 import React from 'react';
 import { 
   CheckCircle, 
@@ -55,11 +56,16 @@ export default function ProductModal({
   products = [],
   fetchAdminData,
   adminFetch,
-  showToast
+  showToast,
+  setShowBrowseModal = () => {},
+  setBrowseTargetType = () => {},
+  setBrowseTargetField = () => {}
 }) {
   if (!showProductModal) return null;
 
   const selectedCategoryObj = categories.find(c => c.id === Number(productForm.category_id));
+  const pageTitle = productForm.seo_title || productForm.title || 'Product Title';
+  const metaDesc = productForm.seo_description || productForm.description || 'Product description for search engine listing...';
 
   return (
         <div data-reticle-target="admin-product-modal" className="drawer-overlay flex items-center justify-center p-2 sm:p-4 z-50">
@@ -263,7 +269,7 @@ export default function ProductModal({
                               src={resolveImgUrl(imgUrl)} 
                               alt={`Product Image ${idx + 1}`}
                               className="w-full h-full object-cover select-none pointer-events-none" 
-                              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=200&q=80'; }}
+                              onError={(e) => { e.target.src = DEFAULT_FALLBACK_SVG; }}
                             />
 
                             {/* DRAG HANDLE BADGE */}
