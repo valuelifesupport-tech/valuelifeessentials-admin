@@ -30,6 +30,8 @@ import ReviewsTab from './tabs/ReviewsTab';
 import OrdersTab from './tabs/OrdersTab';
 import UsersTab from './tabs/UsersTab';
 import PagesTab from './tabs/PagesTab';
+import BlogsTab from './tabs/BlogsTab';
+import InstagramTab from './tabs/InstagramTab';
 import AnnouncementTab from './tabs/AnnouncementTab';
 import HeroTab from './tabs/HeroTab';
 import FiltersTab from './tabs/FiltersTab';
@@ -38,6 +40,9 @@ import SectionsTab from './tabs/SectionsTab';
 import PaymentTab from './tabs/PaymentTab';
 import TaxesTab from './tabs/TaxesTab';
 import SettingsTab from './tabs/SettingsTab';
+import ThemeTab from './tabs/ThemeTab';
+import SubscribersTab from './tabs/SubscribersTab';
+import EditorialTab from './tabs/EditorialTab';
 
 // Modal Components
 import ProductModal from './modals/ProductModal';
@@ -53,6 +58,8 @@ import CategoryModal from './modals/CategoryModal';
 import SubcategoryModal from './modals/SubcategoryModal';
 import BrowseModal from './modals/BrowseModal';
 import PageModal from './modals/PageModal';
+import BlogModal from './modals/BlogModal';
+import InstagramModal from './modals/InstagramModal';
 import UserDossierModal from './modals/UserDossierModal';
 import ConfirmModals from './modals/ConfirmModals';
 
@@ -85,12 +92,13 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
     askConfirmation: modals.askConfirmation,
     setProducts: data.setProducts, setCollections: data.setCollections,
     setBanners: data.setBanners, setCoupons: data.setCoupons,
-    setPages: data.setPages, setFilterGroups: data.setFilterGroups,
+    setPages: data.setPages, setBlogs: data.setBlogs, setInstagramPosts: data.setInstagramPosts, setFilterGroups: data.setFilterGroups,
     setShowCategoryModal: modals.setShowCategoryModal, setShowCollectionModal: modals.setShowCollectionModal,
     setShowSubcategoryModal: modals.setShowSubcategoryModal, setShowBannerModal: modals.setShowBannerModal,
     setShowCouponModal: modals.setShowCouponModal, setShowPageModal: modals.setShowPageModal,
+    setShowBlogModal: modals.setShowBlogModal, setShowInstagramModal: modals.setShowInstagramModal,
     setEditingCategory: modals.setEditingCategory, setEditingCollection: modals.setEditingCollection,
-    setEditingPage: modals.setEditingPage,
+    setEditingPage: modals.setEditingPage, setEditingBlog: modals.setEditingBlog, setEditingInstagramPost: modals.setEditingInstagramPost,
     setDeleteConfirmCategory: modals.setDeleteConfirmCategory, setDeletingCategoryId: modals.setDeletingCategoryId,
     selectedProductForVariants: modals.selectedProductForVariants,
     setSelectedProductForVariants: modals.setSelectedProductForVariants,
@@ -101,8 +109,7 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
   // Tab navigation
   const [activeTab, setActiveTab] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab') || 'analytics';
-    return tab === 'theme' ? 'analytics' : tab;
+    return params.get('tab') || 'analytics';
   });
 
   // Tab lazy-loading
@@ -150,7 +157,10 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
     banners: data.banners.length,
     coupons: data.coupons.length,
     reviews: data.reviews.length,
-    pages: data.pages.length
+    pages: data.pages.length,
+    blogs: (data.blogs || []).length,
+    instagramPosts: (data.instagramPosts || []).length,
+    subscribers: (data.subscribers || []).length
   };
 
   // --- Auth Gate ---
@@ -366,6 +376,23 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
             />
           )}
 
+          {activeTab === 'instagram' && (
+            <InstagramTab
+              instagramPosts={data.instagramPosts}
+              setInstagramPosts={data.setInstagramPosts}
+              setShowInstagramModal={modals.setShowInstagramModal}
+              setEditingInstagramPost={modals.setEditingInstagramPost}
+              setInstagramForm={catalogActions.setInstagramForm}
+              handleDeleteInstagramPost={catalogActions.handleDeleteInstagramPost}
+              handleToggleInstagramActive={catalogActions.handleToggleInstagramActive}
+              sectionsConfig={config.sectionsConfig}
+              updateAndSaveSectionToggle={config.updateAndSaveSectionToggle}
+              settings={data.settings}
+              adminFetch={auth.adminFetch}
+              showToast={showToast}
+            />
+          )}
+
           {activeTab === 'coupons' && (
             <CouponsTab
               coupons={data.coupons}
@@ -445,6 +472,18 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
             />
           )}
 
+          {activeTab === 'blogs' && (
+            <BlogsTab
+              blogs={data.blogs}
+              setEditingBlog={modals.setEditingBlog}
+              setBlogForm={catalogActions.setBlogForm}
+              setShowBlogModal={modals.setShowBlogModal}
+              handleDeleteBlog={catalogActions.handleDeleteBlog}
+              handleToggleBlogPublish={catalogActions.handleToggleBlogPublish}
+              handleToggleBlogFeatured={catalogActions.handleToggleBlogFeatured}
+            />
+          )}
+
           {activeTab === 'announcement' && (
             <AnnouncementTab
               settingsForm={config.settingsForm}
@@ -462,6 +501,11 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
               handleHeroSubmit={config.handleHeroSubmit}
               updateAndSaveHeroToggle={config.updateAndSaveHeroToggle}
               showToast={showToast}
+              adminFetch={auth.adminFetch}
+              heroSlides={data.heroSlides}
+              setHeroSlides={data.setHeroSlides}
+              fetchHeroSlides={data.fetchHeroSlides}
+              askConfirmation={modals.askConfirmation}
             />
           )}
 
@@ -570,6 +614,34 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
               setSettings={data.setSettings}
               onUpdateSettings={onUpdateSettings}
               showToast={showToast}
+            />
+          )}
+
+          {activeTab === 'theme' && (
+            <ThemeTab
+              themeConfig={config.themeConfig}
+              setThemeConfig={config.setThemeConfig}
+              handleThemeSubmit={config.handleThemeSubmit}
+            />
+          )}
+
+          {activeTab === 'editorial' && (
+            <EditorialTab
+              adminFetch={auth.adminFetch}
+              showToast={showToast}
+              sectionsConfig={config.sectionsConfig}
+              updateAndSaveSectionToggle={config.updateAndSaveSectionToggle}
+            />
+          )}
+
+          {activeTab === 'subscribers' && (
+            <SubscribersTab
+              subscribers={data.subscribers}
+              setSubscribers={data.setSubscribers}
+              fetchSubscribers={data.fetchSubscribers}
+              adminFetch={auth.adminFetch}
+              showToast={showToast}
+              askConfirmation={modals.askConfirmation}
             />
           )}
         </main>
@@ -779,6 +851,24 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
         pageForm={catalogActions.pageForm}
         setPageForm={catalogActions.setPageForm}
         handlePageSubmit={catalogActions.handlePageSubmit}
+      />
+
+      <BlogModal
+        showBlogModal={modals.showBlogModal}
+        setShowBlogModal={modals.setShowBlogModal}
+        editingBlog={modals.editingBlog}
+        blogForm={catalogActions.blogForm}
+        setBlogForm={catalogActions.setBlogForm}
+        handleBlogSubmit={catalogActions.handleBlogSubmit}
+      />
+
+      <InstagramModal
+        showInstagramModal={modals.showInstagramModal}
+        setShowInstagramModal={modals.setShowInstagramModal}
+        editingInstagramPost={modals.editingInstagramPost}
+        instagramForm={catalogActions.instagramForm}
+        setInstagramForm={catalogActions.setInstagramForm}
+        handleInstagramSubmit={catalogActions.handleInstagramSubmit}
       />
 
       <UserDossierModal

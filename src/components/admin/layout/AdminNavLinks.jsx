@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   BarChart2, Package, ShoppingBag, Layers, Sparkles, ImageIcon, 
   Filter, Grid, DollarSign, Users, Tag, ChevronDown, ChevronRight, 
-  Megaphone, Image, FileText, Star, Settings 
+  Megaphone, Image, FileText, Star, Settings, BookOpen, Instagram,
+  Palette, Mail, Compass 
 } from 'lucide-react';
 
 export default function AdminNavLinks({
@@ -30,7 +31,10 @@ export default function AdminNavLinks({
     banners = 0,
     coupons = 0,
     reviews = 0,
-    pages = 0
+    pages = 0,
+    blogs = 0,
+    instagramPosts = 0,
+    subscribers = 0
   } = counts;
 
   return (
@@ -226,6 +230,19 @@ export default function AdminNavLinks({
             </button>
 
             <button 
+              onClick={() => handleNavSelect('theme')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                activeTab === 'theme' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+              data-reticle-target="admin-nav-theme"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Palette size={16} className="text-purple-400 flex-shrink-0" /> 
+                <span className="truncate whitespace-nowrap text-xs font-bold">Theme & Design Studio</span>
+              </div>
+            </button>
+
+            <button 
               onClick={() => handleNavSelect('hero')}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                 activeTab === 'hero' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -268,6 +285,35 @@ export default function AdminNavLinks({
             </button>
 
             <button 
+              onClick={() => handleNavSelect('editorial')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                activeTab === 'editorial' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+              data-reticle-target="admin-nav-editorial"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Compass size={16} className="text-amber-400 flex-shrink-0" /> 
+                <span className="truncate whitespace-nowrap text-xs font-bold">Editorial Promo & Story</span>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => handleNavSelect('instagram')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                activeTab === 'instagram' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+              data-reticle-target="admin-nav-instagram"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Instagram size={16} className="text-pink-400 flex-shrink-0" /> 
+                <span className="truncate whitespace-nowrap text-xs font-bold">📸 Instagram Feed (6-Grid)</span>
+              </div>
+              <span className="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-md border border-slate-700 font-extrabold flex-shrink-0 whitespace-nowrap">
+                {instagramPosts}
+              </span>
+            </button>
+
+            <button 
               onClick={() => handleNavSelect('coupons')}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                 activeTab === 'coupons' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -280,6 +326,22 @@ export default function AdminNavLinks({
               </div>
               <span className="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-md border border-slate-700 font-extrabold flex-shrink-0 whitespace-nowrap">
                 {coupons}
+              </span>
+            </button>
+
+            <button 
+              onClick={() => handleNavSelect('subscribers')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                activeTab === 'subscribers' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+              data-reticle-target="admin-nav-subscribers"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Mail size={16} className="text-sky-400 flex-shrink-0" /> 
+                <span className="truncate whitespace-nowrap text-xs font-bold">Newsletter Subscribers</span>
+              </div>
+              <span className="bg-slate-800 text-sky-400 text-[10px] px-2 py-0.5 rounded-md border border-slate-700 font-extrabold flex-shrink-0 whitespace-nowrap">
+                {subscribers}
               </span>
             </button>
           </div>
@@ -331,6 +393,22 @@ export default function AdminNavLinks({
               </div>
               <span className="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-md border border-slate-700 font-extrabold flex-shrink-0 whitespace-nowrap">
                 {pages}
+              </span>
+            </button>
+
+            <button 
+              onClick={() => handleNavSelect('blogs')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                activeTab === 'blogs' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+              data-reticle-target="admin-nav-blogs"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <BookOpen size={16} className="flex-shrink-0 text-emerald-400" /> 
+                <span className="truncate whitespace-nowrap text-xs font-bold">Blog & Journal</span>
+              </div>
+              <span className="bg-slate-800 text-emerald-400 text-[10px] px-2 py-0.5 rounded-md border border-slate-700 font-extrabold flex-shrink-0 whitespace-nowrap">
+                {blogs}
               </span>
             </button>
           </div>

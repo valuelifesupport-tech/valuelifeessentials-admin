@@ -71,6 +71,14 @@ export default function useAdminModals() {
   const [showPageModal, setShowPageModal] = useState(false);
   const [editingPage, setEditingPage] = useState(null);
 
+  // Blog modal
+  const [showBlogModal, setShowBlogModal] = useState(false);
+  const [editingBlog, setEditingBlog] = useState(null);
+
+  // Instagram modal
+  const [showInstagramModal, setShowInstagramModal] = useState(false);
+  const [editingInstagramPost, setEditingInstagramPost] = useState(null);
+
   // User dossier
   const [selectedUserDossier, setSelectedUserDossier] = useState(null);
   const [loadingUserDossier, setLoadingUserDossier] = useState(false);
@@ -149,6 +157,12 @@ export default function useAdminModals() {
     // Page
     showPageModal, setShowPageModal,
     editingPage, setEditingPage,
+    // Blog
+    showBlogModal, setShowBlogModal,
+    editingBlog, setEditingBlog,
+    // Instagram
+    showInstagramModal, setShowInstagramModal,
+    editingInstagramPost, setEditingInstagramPost,
     // User dossier
     selectedUserDossier, setSelectedUserDossier,
     loadingUserDossier, setLoadingUserDossier,

@@ -19,13 +19,29 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
 
   // Content & media
   const [pages, setPages] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [instagramPosts, setInstagramPosts] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
   const [mediaFiles, setMediaFiles] = useState([]);
   const [filterGroups, setFilterGroups] = useState([]);
+  const [heroSlides, setHeroSlides] = useState([]);
 
   // Tab lazy-loading
   const [loadedTabs, setLoadedTabs] = useState(new Set());
 
   const sf = (url) => safeFetchJson(adminFetch, url);
+
+  const fetchHeroSlides = async () => {
+    const s = await sf('/api/admin/hero-slides');
+    if (s && Array.isArray(s)) setHeroSlides(s);
+    return s;
+  };
+
+  const fetchSubscribers = async () => {
+    const subs = await sf('/api/admin/newsletter/subscribers');
+    if (subs && Array.isArray(subs)) setSubscribers(subs);
+    return subs;
+  };
 
   // ------ Fetchers ------
   const fetchAnalytics = async () => {
@@ -35,13 +51,17 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
 
   const fetchAdminData = async () => {
     try {
-      const [prods, cats, cols, ords, setts, revs] = await Promise.all([
+      const [prods, cats, cols, ords, setts, revs, slides, blgs, igs, subs] = await Promise.all([
         sf('/api/products?includeDrafts=true'),
         sf('/api/categories'),
         sf('/api/collections'),
         sf('/api/admin/orders'),
         sf('/api/settings'),
-        sf('/api/reviews')
+        sf('/api/reviews'),
+        sf('/api/admin/hero-slides'),
+        sf('/api/admin/blogs'),
+        sf('/api/admin/instagram-posts'),
+        sf('/api/admin/newsletter/subscribers')
       ]);
       if (prods) setProducts(prods);
       if (cats) setCategories(cats);
@@ -49,6 +69,10 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
       if (ords) setOrders(ords);
       if (setts) setSettings(setts);
       if (revs) setReviews(revs);
+      if (slides && Array.isArray(slides)) setHeroSlides(slides);
+      if (blgs && Array.isArray(blgs)) setBlogs(blgs);
+      if (igs && Array.isArray(igs)) setInstagramPosts(igs);
+      if (subs && Array.isArray(subs)) setSubscribers(subs);
     } catch (err) {
       console.error('fetchAdminData error:', err);
     }
@@ -60,6 +84,11 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
 
     try {
       switch (tab) {
+        case 'hero': {
+          const s = await sf('/api/admin/hero-slides');
+          if (s && Array.isArray(s)) setHeroSlides(s);
+          break;
+        }
         case 'media': {
           const m = await sf('/api/admin/media');
           if (m) setMediaFiles(m);
@@ -88,6 +117,20 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
         case 'pages': {
           const p = await sf('/api/pages');
           if (p) setPages(p);
+          break;
+        }
+        case 'blogs': {
+          const b = await sf('/api/admin/blogs');
+          if (b) setBlogs(b);
+          break;
+        }
+        case 'instagram': {
+          const ig = await sf('/api/admin/instagram-posts');
+          if (ig && Array.isArray(ig)) setInstagramPosts(ig);
+          break;
+        }
+        case 'subscribers': {
+          await fetchSubscribers();
           break;
         }
         case 'filters': {
@@ -127,13 +170,19 @@ export default function useAdminData({ adminFetch, isAuthLocked }) {
     users, setUsers,
     settings, setSettings,
     pages, setPages,
+    blogs, setBlogs,
+    instagramPosts, setInstagramPosts,
+    subscribers, setSubscribers,
     mediaFiles, setMediaFiles,
     filterGroups, setFilterGroups,
+    heroSlides, setHeroSlides,
     loadedTabs,
     // Fetchers
     fetchAnalytics,
     fetchAdminData,
     fetchTabData,
+    fetchHeroSlides,
+    fetchSubscribers,
     sf
   };
 }
