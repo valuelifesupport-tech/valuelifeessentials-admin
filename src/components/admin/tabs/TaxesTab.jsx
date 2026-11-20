@@ -62,7 +62,9 @@ export default function TaxesTab({
     const taxAmt = Number(o.tax_amount || o.gst_amount || 0);
     const isCancelled = o.order_status === 'CANCELLED' || o.payment_status === 'REFUNDED' || o.payment_status === 'FAILED';
     const isPendingOnline = o.order_status === 'PENDING_PAYMENT' || (o.payment_mode !== 'COD' && o.payment_status !== 'PAID' && o.payment_status !== 'PARTIAL_PAID');
-    const isIntra = !o.state_name || o.state_name.toLowerCase() === 'maharashtra';
+    const storeState = (settingsForm?.store_state || settingsForm?.state || 'Telangana').trim().toLowerCase();
+    const orderState = o.shipping_state || o.state_name || '';
+    const isIntra = Boolean(orderState && orderState.trim().toLowerCase() === storeState);
     const taxableVal = Math.max(0, Number(o.total_amount || 0) - taxAmt);
     const cgst = Number(o.cgst_amount || 0) || (isIntra ? taxAmt / 2 : 0);
     const sgst = Number(o.sgst_amount || 0) || (isIntra ? taxAmt / 2 : 0);
@@ -77,7 +79,7 @@ export default function TaxesTab({
       customer_email: o.customer_email || '',
       customer_gstin: o.customer_gstin || '',
       shipping_address: o.shipping_address || '',
-      state_name: o.state_name || 'Maharashtra',
+      state_name: orderState || 'Telangana',
       is_intra_state: isIntra,
       tax_type: isIntra ? 'INTRA-STATE (CGST + SGST)' : 'INTER-STATE (IGST)',
       taxable_value: taxableVal,

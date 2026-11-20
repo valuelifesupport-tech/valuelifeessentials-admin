@@ -6,8 +6,9 @@ export default function OrderGstBreakdown({ selectedOrderDetails, settingsForm =
   const cgst = Number(selectedOrderDetails.cgst_amount || 0);
   const sgst = Number(selectedOrderDetails.sgst_amount || 0);
   const igst = Number(selectedOrderDetails.igst_amount || 0);
-  const stateName = selectedOrderDetails.state_name || 'Maharashtra';
-  const isIntra = (!selectedOrderDetails.state_name || selectedOrderDetails.state_name.toLowerCase() === 'maharashtra');
+  const storeState = (settingsForm.store_state || settingsForm.state || 'Telangana').trim().toLowerCase();
+  const stateName = selectedOrderDetails.shipping_state || selectedOrderDetails.state_name || 'Telangana';
+  const isIntra = Boolean(stateName && stateName.trim().toLowerCase() === storeState);
   const taxableVal = Math.max(0, Number(selectedOrderDetails.total_amount || 0) - taxAmt);
 
   return (

@@ -22,6 +22,43 @@ const clean10Phone = (p) => {
   return digits.length > 10 ? digits.slice(-10) : digits;
 };
 
+const getStateFromPincode = (pincode) => {
+  if (!pincode) return '';
+  const pin = String(pincode).trim().replace(/\D/g, '');
+  if (pin.length < 2) return '';
+  const p2 = parseInt(pin.substring(0, 2), 10);
+  const p3 = parseInt(pin.substring(0, 3), 10);
+  if (p2 === 11) return 'Delhi';
+  if (p2 === 12 || p2 === 13) return 'Haryana';
+  if (p2 === 14 || p2 === 15) return 'Punjab';
+  if (p2 === 16) return 'Chandigarh';
+  if (p2 === 17) return 'Himachal Pradesh';
+  if (p2 === 18 || p2 === 19) return 'Jammu and Kashmir';
+  if (p2 >= 20 && p2 <= 28) return (p3 >= 248 && p3 <= 263) ? 'Uttarakhand' : 'Uttar Pradesh';
+  if (p2 >= 30 && p2 <= 34) return 'Rajasthan';
+  if (p2 >= 36 && p2 <= 39) return p3 === 396 ? 'Dadra and Nagar Haveli and Daman and Diu' : 'Gujarat';
+  if (p2 >= 40 && p2 <= 44) return p3 === 403 ? 'Goa' : 'Maharashtra';
+  if (p2 >= 45 && p2 <= 49) return (p3 >= 490 && p3 <= 497) ? 'Chhattisgarh' : 'Madhya Pradesh';
+  if (p2 >= 50 && p2 <= 53) return (p3 >= 500 && p3 <= 509) ? 'Telangana' : 'Andhra Pradesh';
+  if (p2 >= 56 && p2 <= 59) return 'Karnataka';
+  if (p2 >= 60 && p2 <= 64) return p3 === 605 ? 'Puducherry' : 'Tamil Nadu';
+  if (p2 >= 67 && p2 <= 69) return p3 === 682 ? 'Lakshadweep' : 'Kerala';
+  if (p2 >= 70 && p2 <= 74) return p3 === 737 ? 'Sikkim' : (p3 === 744 ? 'Andaman and Nicobar Islands' : 'West Bengal');
+  if (p2 >= 75 && p2 <= 77) return 'Odisha';
+  if (p2 === 78) return 'Assam';
+  if (p2 === 79) {
+    if (p3 >= 790 && p3 <= 792) return 'Arunachal Pradesh';
+    if (p3 >= 793 && p3 <= 794) return 'Meghalaya';
+    if (p3 === 795) return 'Manipur';
+    if (p3 === 796) return 'Mizoram';
+    if (p3 >= 797 && p3 <= 798) return 'Nagaland';
+    if (p3 === 799) return 'Tripura';
+    return 'Assam';
+  }
+  if (p2 >= 80 && p2 <= 85) return (p3 >= 814 && p3 <= 835) ? 'Jharkhand' : 'Bihar';
+  return '';
+};
+
 export default function OrderCustomerCard({
   selectedOrderDetails,
   setSelectedOrderDetails,
@@ -35,7 +72,7 @@ export default function OrderCustomerCard({
   const [editEmail, setEditEmail] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editCity, setEditCity] = useState('');
-  const [editState, setEditState] = useState('Maharashtra');
+  const [editState, setEditState] = useState('');
   const [editPincode, setEditPincode] = useState('');
   const [savingAddress, setSavingAddress] = useState(false);
 
@@ -47,12 +84,13 @@ export default function OrderCustomerCard({
     })();
 
     if (selectedOrderDetails) {
+      const autoSt = getStateFromPincode(rawPin);
       setEditName(selectedOrderDetails.customer_name || '');
       setEditPhone(clean10Phone(selectedOrderDetails.customer_phone));
       setEditEmail(selectedOrderDetails.customer_email || '');
       setEditAddress(selectedOrderDetails.shipping_address || '');
       setEditCity(selectedOrderDetails.shipping_city || selectedOrderDetails.city || '');
-      setEditState(selectedOrderDetails.shipping_state || selectedOrderDetails.state_name || 'Maharashtra');
+      setEditState(selectedOrderDetails.shipping_state || selectedOrderDetails.state_name || autoSt || '');
       setEditPincode(rawPin || '');
       setIsEditingAddress(false);
     }
@@ -154,11 +192,16 @@ export default function OrderCustomerCard({
                 <span>{selectedOrderDetails.shipping_address || 'No street address provided'}</span>
               </div>
               <div className="text-slate-400 text-[11px] pl-4">
-                {[
-                  selectedOrderDetails.shipping_city || selectedOrderDetails.city,
-                  selectedOrderDetails.shipping_state || selectedOrderDetails.state_name || 'Maharashtra',
-                  selectedOrderDetails.shipping_pincode ? `PIN: ${selectedOrderDetails.shipping_pincode}` : ''
-                ].filter(Boolean).join(', ')}
+                {(() => {
+                  const dispPin = selectedOrderDetails.shipping_pincode || (selectedOrderDetails.shipping_address ? (selectedOrderDetails.shipping_address.match(/\b\d{6}\b/) || [])[0] : '');
+                  const autoSt = getStateFromPincode(dispPin);
+                  const dispState = selectedOrderDetails.shipping_state || selectedOrderDetails.state_name || autoSt || '';
+                  return [
+                    selectedOrderDetails.shipping_city || selectedOrderDetails.city,
+                    dispState,
+                    dispPin ? `PIN: ${dispPin}` : ''
+                  ].filter(Boolean).join(', ');
+                })()}
               </div>
               <div className="text-slate-500 text-[10px] pl-4">Country: {selectedOrderDetails.country || 'India'}</div>
             </div>
@@ -243,10 +286,11 @@ export default function OrderCustomerCard({
             <div>
               <label className="text-[10px] font-bold text-slate-300 block mb-1">State *</label>
               <select
-                value={editState}
+                value={editState || ''}
                 onChange={(e) => setEditState(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white font-medium text-xs focus:border-emerald-500 focus:outline-none cursor-pointer"
               >
+                <option value="">Select State</option>
                 {INDIAN_STATES.map((st) => (
                   <option key={st} value={st}>{st}</option>
                 ))}
@@ -259,7 +303,12 @@ export default function OrderCustomerCard({
                 required
                 maxLength={6}
                 value={editPincode}
-                onChange={(e) => setEditPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => {
+                  const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setEditPincode(clean);
+                  const autoSt = getStateFromPincode(clean);
+                  if (autoSt) setEditState(autoSt);
+                }}
                 className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white font-mono text-xs font-bold focus:border-emerald-500 focus:outline-none text-center"
                 placeholder="Enter 6-digit pincode"
               />
