@@ -200,13 +200,15 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
             </div>
           )}
 
-          <form onSubmit={auth.handleAdminLogin} className="space-y-4">
+          <form onSubmit={auth.handleAdminLogin} className="space-y-4" autoComplete="off">
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
                 Admin Username / Email
               </label>
               <input
                 type="text" required
+                autoComplete="off"
+                name="admin_user_login_identity"
                 value={auth.loginForm.username}
                 onChange={(e) => auth.setLoginForm({ ...auth.loginForm, username: e.target.value })}
                 placeholder="Enter admin username or email"
@@ -222,6 +224,8 @@ export default function AdminDashboard({ onExitAdmin, showToast, sectionsConfig:
               </div>
               <input
                 type="password" required
+                autoComplete="new-password"
+                name="admin_pass_login_secret"
                 value={auth.loginForm.password}
                 onChange={(e) => auth.setLoginForm({ ...auth.loginForm, password: e.target.value })}
                 placeholder="••••••••"
